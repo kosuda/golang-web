@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
+	_ "strconv"
 )
 
 const (
@@ -20,40 +20,40 @@ func MusicGet(w http.ResponseWriter, r *http.Request, params httprouter.Params) 
 	log.Print("access to user get api")
 
 	id := params.ByName("id")
-	var artist_id string
-	var limit int
-	var start int
-	var title string
-
-	if val, ok := r.URL.Query()["artist_id"]; ok {
-		artist_id = val[0]
-	} else {
-		artist_id = ""
-	}
-
-	if val, ok := r.URL.Query()["limit"]; ok {
-		limit, _ = strconv.Atoi(val[0])
-	} else {
-		limit = 100
-	}
-
-	if val, ok := r.URL.Query()["title"]; ok {
-		title = "/" + val[0] + "/"
-	} else {
-		title = ""
-	}
-
-	if val, ok := r.URL.Query()["start"]; ok {
-		start, _ = strconv.Atoi(val[0])
-	} else {
-		start = 0
-	}
+	// var artist_id string
+	// var limit int
+	// var start int
+	// var title string
+	//
+	// if val, ok := r.URL.Query()["artist_id"]; ok {
+	// 	artist_id = val[0]
+	// } else {
+	// 	artist_id = ""
+	// }
+	//
+	// if val, ok := r.URL.Query()["limit"]; ok {
+	// 	limit, _ = strconv.Atoi(val[0])
+	// } else {
+	// 	limit = 100
+	// }
+	//
+	// if val, ok := r.URL.Query()["title"]; ok {
+	// 	title = "/" + val[0] + "/"
+	// } else {
+	// 	title = ""
+	// }
+	//
+	// if val, ok := r.URL.Query()["start"]; ok {
+	// 	start, _ = strconv.Atoi(val[0])
+	// } else {
+	// 	start = 0
+	// }
 
 	if id == "" {
 		log.Print("get all")
 
-		var data model.Music
-		db.Find(colname, nil, &data)
+		var data model.MusicSlice
+		db.Find(musicColname, nil, &data)
 		if json, err := data.MarshalJSON(); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		} else {
@@ -61,10 +61,10 @@ func MusicGet(w http.ResponseWriter, r *http.Request, params httprouter.Params) 
 			w.Write(json)
 		}
 	} else {
-		log.Print("get all")
+		log.Print("get by id")
 
 		var data model.MusicSlice
-		db.Find(colname, nil, &data)
+		db.FindByID(musicColname, id, &data)
 		if json, err := data.MarshalJSON(); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		} else {
