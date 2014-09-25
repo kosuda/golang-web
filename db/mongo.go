@@ -42,7 +42,7 @@ func Find(colname string, query interface{}, result interface{}) error {
 func FindByID(colname string, id string, result interface{}) error {
 	col := _session.DB(dbname).C(colname)
 
-	err := col.FindId(id).One(result)
+	err := col.Find(bson.M{"id": id}).One(result)
 
 	if err != nil {
 		return err
