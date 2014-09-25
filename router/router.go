@@ -17,9 +17,21 @@ func New() *httprouter.Router {
 func setup(router *httprouter.Router) {
 	router.GET("/api/user", controller.UserGet)
 	router.GET("/api/user/:id", controller.UserGet)
+	router.GET("/api/redis/user/:id", controller.RedisUserGet)
+	router.GET("/api/redis/user", controller.RedisUserGet)
 	router.PUT("/api/user", controller.UserUpsert)
 	router.PUT("/api/user/:id", controller.UserUpsert)
+	router.PUT("/api/redis/user/:id", controller.RedisUserWrite)
 	router.DELETE("/api/user", controller.UserDelete)
 	router.DELETE("/api/user/:id", controller.UserDelete)
 	router.PATCH("/api/user/:id", controller.UserUpdate)
+
+	// TOTEC
+	router.GET("/api/musics", controller.MusicGet)
+	router.GET("/api/musics/:id", controller.MusicGet)
+	router.POST("/api/musics", controller.MusicUpsert)
+	router.PUT("/api/musics/:id", controller.MusicUpsert)
+	router.DELETE("/api/musics/:id", controller.MusicDelete)
+
+	router.POST("/api/musics/:id/play", controller.HistoryUpsert)
 }

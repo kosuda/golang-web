@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"github.com/kosuda/golang-web/db"
@@ -132,6 +133,84 @@ func UserUpdate(w http.ResponseWriter, r *http.Request, params httprouter.Params
 		// }
 
 		if err := db.UpdateByID(colname, id, user); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte("{\"status\":\"ok\"}"))
+	}
+}
+
+// RedisUserGet function
+func RedisUserGet(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	log.Print("access to user get api of redis")
+
+	id := params.ByName("id")
+
+	if id == "" {
+		log.Print("get all")
+
+		if jsonArr, err := db.ReadAll("user"); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			var json bytes.Buffer
+			json.Grow(1024)
+			json.WriteString("[")
+			for i := range jsonArr {
+				if i%2 == 0 {
+					continue
+				}
+				if elem, ok := jsonArr[i].([]byte); ok {
+					json.Write(elem)
+					if i != len(jsonArr)-1 {
+						json.WriteString(",")
+					}
+				}
+			}
+			json.WriteString("]")
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(json.Bytes())
+
+		}
+
+	} else {
+		log.Printf("get by id: id = %s", id)
+
+		if json, err := db.Read("user", id); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(json))
+
+		}
+
+	}
+}
+
+// RedisUserWrite function
+func RedisUserWrite(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	log.Print("access to user write api of redis")
+
+	id := params.ByName("id")
+
+	if id == "" {
+		log.Print("put without _id")
+		return
+	}
+
+	log.Print("put with id")
+
+	if r.Body != nil {
+		defer r.Body.Close()
+
+		body, _ := ioutil.ReadAll(r.Body)
+		// if err := json.Unmarshal([]byte(body), &user); err != nil {
+		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
+		if err := db.Write("user", id, body); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
